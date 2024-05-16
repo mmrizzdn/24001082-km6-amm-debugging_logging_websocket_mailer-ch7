@@ -1,0 +1,28 @@
+### daftar
+POST http://localhost:3000/api/v1/daftar
+Content-Type: application/json
+
+{
+    "nama":"ammar",
+    "email":"21102122@ittelkom-pwt.ac.id",
+    "kataSandi":"ammar123"
+}
+
+### masuk
+POST http://localhost:3000/api/v1/masuk
+Content-Type: application/json
+
+{
+    "email":"21102122@ittelkom-pwt.ac.id",
+    "kataSandi":"ammar123"
+}
+
+### whoami
+GET http://localhost:3000/api/v1/whoami
+# Authorization: Bearer tokentoken
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1ODc2MTY2fQ.ULA8ASsc9pkrI7ysrjDslhPdGzLx6aOjTTvHwyp8auw
+
+### request verify email
+GET http://localhost:3000/api/v1/minta-verifikasi
+# Authorization: Bearer tokentoken
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1ODgyODYyfQ.nBpzWfAQy0388NbL8dnx2nMArP4krBH6CKSeKCRSfvo
