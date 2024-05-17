@@ -25,4 +25,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxN
 ### request verify email
 GET http://localhost:3000/api/v1/minta-verifikasi
 # Authorization: Bearer tokentoken
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1ODgyODYyfQ.nBpzWfAQy0388NbL8dnx2nMArP4krBH6CKSeKCRSfvo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1OTUxNzc4fQ.K1H4djZs7cvQmMiILjOOzbMIa3SGJ29tjfYYrdcwGCQ

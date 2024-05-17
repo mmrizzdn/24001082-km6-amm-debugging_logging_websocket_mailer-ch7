@@ -119,20 +119,16 @@ module.exports = {
 
 	verifyEmail: async (req, res, next) => {
 		try {
-			// check token didalam query
 			const { token } = req.query;
-			// verify token -> ambil pengguna_id
 			jwt.verify(token, JWT_SECRET, async (err, data) => {
 				if (err) {
-					return res.send('<h1>Failed to Verify</h1>');
+					return res.send('<h1>Gagal Verifikasi</h1>');
 				}
-				// update is_verified=true where id=pengguna_id
 				await prisma.pengguna.update({
 					data: { is_verified: true },
 					where: { id: data.id }
 				});
-				// render html (success)
-				res.send('<h1>Verify Success</h1>');
+				res.send('<h1>Verifikasi Berhasil</h1>');
 			});
 		} catch (error) {
 			next(error);
@@ -145,9 +141,14 @@ module.exports = {
 			let url = `${req.protocol}://${req.get(
 				'host'
 			)}/api/v1/verify?token=${token}`;
-			let html = await getHTML('verifikasi.ejs', {
-				name: 'Ammar',
-				verification_url: url
+			let html = await getHTML('email.ejs', {
+				judul: 'Silakan Verifikasi Emailmu',
+				nama: req.pengguna.nama,
+				pesan1: 'Kami ngirimin email ini sebagai tanggapan atas permintaanmu buat verifikasi emailmu.',
+				pesan2: 'Untuk melakukan verifikasi emailmu, silakan klik tautan di bawah ini:',
+				pesan3: 'Abaikan email ini jika kamu nggak minta perubahan kata sandi.',
+				tombol: 'Verifikasi Email',
+				url_verifikasi: url
 			});
 
 			await sendMail(req.pengguna.email, 'Verification Email', html);
