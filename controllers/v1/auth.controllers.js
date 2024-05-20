@@ -16,7 +16,7 @@ module.exports = {
 			if (!nama || !email || !kataSandi) {
 				return res.status(400).json({
 					status: false,
-					message: 'name, email, dan kata sandi ngga boleh kosong!',
+					message: 'name, email, dan kata sandi nggak boleh kosong!',
 					data: null
 				});
 			}
@@ -69,12 +69,10 @@ module.exports = {
 				where: { email }
 			});
 
-			console.log(pengguna);
-
 			if (!pengguna) {
 				return res.status(400).json({
 					status: false,
-					message: 'email atau kata sandi tidak valid!',
+					message: 'email atau kata sandi nggak valid!',
 					data: null
 				});
 			}
@@ -83,10 +81,11 @@ module.exports = {
 				kataSandi,
 				pengguna.kataSandi
 			);
+
 			if (!kataSandibenar) {
 				return res.status(400).json({
 					status: false,
-					message: 'email atau kata sandi tidak valid!',
+					message: 'email atau kata sandi nggak valid!',
 					data: null
 				});
 			}
@@ -95,7 +94,7 @@ module.exports = {
 
 			let token = jwt.sign({ id: pengguna.id }, JWT_SECRET);
 
-			res.json({
+			return res.json({
 				status: true,
 				message: 'OK',
 				data: { ...pengguna, token }
@@ -105,19 +104,19 @@ module.exports = {
 		}
 	},
 
-	whoami: async (req, res, next) => {
-		try {
-			res.json({
-				status: true,
-				message: 'OK',
-				data: req.pengguna
-			});
-		} catch (error) {
-			next(error);
-		}
-	},
+	// whoami: async (req, res, next) => {
+	// 	try {
+	// 		res.json({
+	// 			status: true,
+	// 			message: 'OK',
+	// 			data: req.pengguna
+	// 		});
+	// 	} catch (error) {
+	// 		next(error);
+	// 	}
+	// },
 
-	verifyEmail: async (req, res, next) => {
+	verifikasiEmail: async (req, res, next) => {
 		try {
 			const { token } = req.query;
 			jwt.verify(token, JWT_SECRET, async (err, data) => {
@@ -125,7 +124,7 @@ module.exports = {
 					return res.send('<h1>Gagal Verifikasi</h1>');
 				}
 				await prisma.pengguna.update({
-					data: { is_verified: true },
+					data: { terverifikasi: true },
 					where: { id: data.id }
 				});
 				res.send('<h1>Verifikasi Berhasil</h1>');
@@ -140,18 +139,106 @@ module.exports = {
 			let token = jwt.sign({ id: req.pengguna.id }, JWT_SECRET);
 			let url = `${req.protocol}://${req.get(
 				'host'
-			)}/api/v1/verify?token=${token}`;
+			)}/api/v1/verifikasi-email?token=${token}`;
+
 			let html = await getHTML('email.ejs', {
 				judul: 'Silakan Verifikasi Emailmu',
 				nama: req.pengguna.nama,
 				pesan1: 'Kami ngirimin email ini sebagai tanggapan atas permintaanmu buat verifikasi emailmu.',
 				pesan2: 'Untuk melakukan verifikasi emailmu, silakan klik tautan di bawah ini:',
-				pesan3: 'Abaikan email ini jika kamu nggak minta perubahan kata sandi.',
+				pesan3: 'Abaikan email ini jika kamu sudah terverifikasi.',
 				tombol: 'Verifikasi Email',
-				url_verifikasi: url
+				url
 			});
 
-			await sendMail(req.pengguna.email, 'Verification Email', html);
+			await sendMail(req.pengguna.email, 'Verifikasi Email', html);
+			return res.json({
+				status: true,
+				message: 'sukses',
+				data: null
+			});
+		} catch (error) {
+			next(error);
+		}
+	},
+
+	resetKataSandi: async (req, res, next) => {
+		try {
+			const { token } = req.query;
+			jwt.verify(token, JWT_SECRET, async (err, data) => {
+				if (err) {
+					return res.send('<h1>Reset Kata Sandi Gagal</h1>');
+				}
+
+				let { kataSandi } = req.body;
+
+				if (!kataSandi) {
+					return res.status(400).json({
+						status: false,
+						message: 'kata sandi nggak boleh kosong!',
+						data: null
+					});
+				}
+
+				terenkripsi = await bcrypt.hash(kataSandi, 10);
+
+				await prisma.pengguna.update({
+					data: { kataSandi: terenkripsi },
+					where: { id: data.id }
+				});
+
+				res.send('<h1>Reset Kata Sandi Beres</h1>');
+			});
+		} catch (error) {
+			next(error);
+		}
+	},
+
+	mintaResetKataSandi: async (req, res, next) => {
+		try {
+			let { email } = req.body;
+
+			if (!email) {
+				return res.status(400).json({
+					status: false,
+					message: 'email nggak boleh kosong!',
+					data: null
+				});
+			}
+
+			let pengguna = await prisma.pengguna.findFirst({
+				where: {
+					email,
+					terverifikasi: true
+				}
+			});
+
+			if (!pengguna) {
+				return res.status(400).json({
+					status: false,
+					message: 'email nggak valid!',
+					data: null
+				});
+			}
+
+			let token = jwt.sign({ id: pengguna.id }, JWT_SECRET);
+
+			let url = `${req.protocol}://${req.get(
+				'host'
+			)}/api/v1/reset-kata-sandi?token=${token}`;
+
+			let html = await getHTML('email.ejs', {
+				judul: 'Silakan Atur Ulang Kata Sandimu',
+				nama: pengguna.nama,
+				pesan1: 'Kami ngirimin email ini sebagai tanggapan atas permintaanmu buat reset kata sandimu.',
+				pesan2: 'Untuk reset kata sandimu, silakan klik tautan di bawah ini:',
+				pesan3: 'Abaikan email ini jika kamu nggak minta buat reset kata sandi.',
+				tombol: 'Reset Kata Sandi',
+				url
+			});
+
+			await sendMail(pengguna.email, 'Reset Kata Sandi', html);
+
 			return res.json({
 				status: true,
 				message: 'sukses',

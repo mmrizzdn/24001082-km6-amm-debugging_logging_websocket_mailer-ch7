@@ -13,16 +13,23 @@ POST http://localhost:3000/api/v1/masuk
 Content-Type: application/json
 
 {
-    "email":"21102122@ittelkom-pwt.ac.id",
-    "kataSandi":"ammar123"
+    "email": "21102122@ittelkom-pwt.ac.id",
+    "kataSandi": "ammar12"
 }
 
 ### whoami
 GET http://localhost:3000/api/v1/whoami
-# Authorization: Bearer tokentoken
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1ODc2MTY2fQ.ULA8ASsc9pkrI7ysrjDslhPdGzLx6aOjTTvHwyp8auw
 
-### request verify email
-GET http://localhost:3000/api/v1/minta-verifikasi
-# Authorization: Bearer tokentoken
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1OTUxNzc4fQ.K1H4djZs7cvQmMiILjOOzbMIa3SGJ29tjfYYrdcwGCQ
+### minta verifikasi email
+GET http://localhost:3000/api/v1/minta-verifikasi-email
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2MjI0NzUwfQ.mRd7BAATgKPFcVLMTlzddA8wDQK5ELB0X-1UY8zLIV4
+
+### minta reset kata sandi
+POST http://localhost:3000/api/v1/minta-reset-kata-sandi
+Content-Type: application/json
+
+{
+    "email": "21102122@ittelkom-pwt.ac.id"
+}
+

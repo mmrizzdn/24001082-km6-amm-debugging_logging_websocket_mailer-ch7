@@ -11,12 +11,13 @@ var app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // view engine setup
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => res.render('./templates/verifikasi.ejs'));
+// app.get('/', (req, res) => res.render('masuk.ejs'));
 app.use('/api/v1', indexRouter);
 
 Sentry.setupExpressErrorHandler(app);

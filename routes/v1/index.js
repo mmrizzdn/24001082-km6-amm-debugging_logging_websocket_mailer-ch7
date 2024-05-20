@@ -5,6 +5,7 @@ const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
 
 const auth = require('../../controllers/v1/auth.controllers');
+const { token } = require('morgan');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -39,7 +40,7 @@ let restrict = (req, res, next) => {
 				status: false,
 				message: 'pengguna ngga ada!',
 				data: null
-			})
+			});
 		}
 
 		delete pengguna.password;
@@ -49,10 +50,22 @@ let restrict = (req, res, next) => {
 };
 
 router.post('/daftar', auth.daftar);
+router.get('/masuk', (req, res) => res.render('masuk.ejs'));
 router.post('/masuk', auth.masuk);
-router.get('/whoami', restrict, auth.whoami);
 
-router.get('/verify', auth.verifyEmail);
-router.get('/minta-verifikasi', restrict, auth.mintaVerifikasiEmail);
+router.get('/minta-verifikasi-email', restrict, auth.mintaVerifikasiEmail);
+router.get('/verifikasi-email', auth.verifikasiEmail);
+
+router.get('/lupa-kata-sandi', (req, res) =>
+	res.render('kataSandi/lupa-kata-sandi.ejs')
+);
+router.post('/lupa-kata-sandi', auth.mintaResetKataSandi);
+
+router.get('/reset-kata-sandi', (req, res) =>
+	res.render('kataSandi/reset-kata-sandi.ejs', { token: req.query.token })
+);
+router.post('/reset-kata-sandi', auth.resetKataSandi);
+
+// router.get('/whoami', restrict, auth.whoami);
 
 module.exports = router;
