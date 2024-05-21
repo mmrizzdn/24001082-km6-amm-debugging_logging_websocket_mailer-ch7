@@ -15,7 +15,7 @@ let restrict = (req, res, next) => {
 	if (!authorization || !authorization.split(' ')[1]) {
 		return res.status(401).json({
 			status: false,
-			message: 'token not provided!',
+			message: 'token tidak tersedia!',
 			data: null
 		});
 	}
@@ -37,22 +37,37 @@ let restrict = (req, res, next) => {
 		if (!pengguna) {
 			return res.status(404).json({
 				status: false,
-				message: 'pengguna ngga ada!',
+				message: 'pengguna nggak ada!',
 				data: null
-			})
+			});
 		}
 
-		delete pengguna.password;
+		delete pengguna.kata_sandi;
+
 		req.pengguna = pengguna;
+		
 		next();
 	});
 };
 
 router.post('/daftar', auth.daftar);
-router.post('/masuk', auth.masuk);
-router.get('/whoami', restrict, auth.whoami);
 
-router.get('/verify', auth.verifyEmail);
-router.get('/minta-verifikasi', restrict, auth.mintaVerifikasiEmail);
+router.get('/masuk', (req, res) => res.render('auth/masuk'));
+router.post('/masuk', auth.masuk);
+
+router.get('/minta-verifikasi-email', restrict, auth.mintaVerifikasiEmail);
+router.get('/verifikasi-email', auth.verifikasiEmail);
+
+router.get('/lupa-kata-sandi', (req, res) =>
+	res.render('auth/lupa-kata-sandi')
+);
+router.post('/lupa-kata-sandi', auth.mintaResetKataSandi);
+
+router.get('/reset-kata-sandi', (req, res) =>
+	res.render('auth/reset-kata-sandi', { token: req.query.token })
+);
+router.post('/reset-kata-sandi', auth.resetKataSandi);
+
+router.get('/welcome', restrict, auth.welcome);
 
 module.exports = router;

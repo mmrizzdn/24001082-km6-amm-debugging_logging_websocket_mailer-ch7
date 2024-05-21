@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Kata Sandi</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Reset Kata Sandi</h1>
+        <form action="/api/v1/reset-kata-sandi?token=<%= token %>" method="POST">
+            <div class="form-group">
+                <label for="kata-sandi-baru">Kata Sandi Baru</label>
+                <input type="password" id="kataSandiBaru" name="kata_sandi_baru" required>
+            </div>
+            <div class="form-group">
+                <label for="konfirmasi-kata-sandi">Konfirmasi Kata Sandi</label>
+                <input type="password" id="konfirmasiKataSandi" name="konfirmasi_kata_sandi" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Reset</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

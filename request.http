@@ -5,7 +5,7 @@ Content-Type: application/json
 {
     "nama":"ammar",
     "email":"21102122@ittelkom-pwt.ac.id",
-    "kataSandi":"ammar123"
+    "kata_sandi":"ammar123"
 }
 
 ### masuk
@@ -13,16 +13,32 @@ POST http://localhost:3000/api/v1/masuk
 Content-Type: application/json
 
 {
-    "email":"21102122@ittelkom-pwt.ac.id",
-    "kataSandi":"ammar123"
+    "email": "21102122@ittelkom-pwt.ac.id",
+    "kata_sandi": "ammar19"
 }
 
-### whoami
-GET http://localhost:3000/api/v1/whoami
-# Authorization: Bearer tokentoken
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1ODc2MTY2fQ.ULA8ASsc9pkrI7ysrjDslhPdGzLx6aOjTTvHwyp8auw
+### minta verifikasi email
+GET http://localhost:3000/api/v1/minta-verifikasi-email
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mjg0MDY1fQ.-UzVQTkMCpl3ZwiD-0ucarNRXCZee04T8QPeVOnXXbc
 
-### request verify email
-GET http://localhost:3000/api/v1/minta-verifikasi
-# Authorization: Bearer tokentoken
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE1ODgyODYyfQ.nBpzWfAQy0388NbL8dnx2nMArP4krBH6CKSeKCRSfvo
+### lupa kata sandi
+POST http://localhost:3000/api/v1/lupa-kata-sandi
+Content-Type: application/json
+
+{
+    "email": "21102122@ittelkom-pwt.ac.id"
+}
+
+### reset kata sandi
+POST http://localhost:3000/api/v1/reset-kata-sandi
+Content-Type: application/json
+
+{
+    "kataSandiBaru": "ammar15",
+    "konfirmasiKataSandi": "ammar15"
+}
+
+### welcome
+GET http://localhost:3000/api/v1/welcome
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2MjcxODE5fQ.cp4VFOK73qCHtZIOuryb__LiZ8Fb_Lamwxp6nDSeS1I
+
