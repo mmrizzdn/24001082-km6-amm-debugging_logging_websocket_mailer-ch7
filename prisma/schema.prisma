@@ -14,11 +14,22 @@ datasource db {
 }
 
 model Pengguna {
-  id            Int     @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   nama          String?
-  email         String  @unique
-  kataSandi     String
-  terverifikasi Boolean @default(false)
+  email         String       @unique
+  kata_sandi    String
+  terverifikasi Boolean      @default(false)
+  Notifikasi    Notifikasi[]
 
   @@map("pengguna")
+}
+
+model Notifikasi {
+  id          Int      @id @default(autoincrement())
+  subjek      String
+  pesan       String
+  pengguna    Pengguna @relation(fields: [id_pengguna], references: [id])
+  id_pengguna Int
+
+  @@map("notifikasi")
 }

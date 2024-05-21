@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Notifications</button>
+        <div class="dropdown-content">
+
+            <ul id="listNotifikasi">
+                <% notifikasi.forEach(item => { %>
+                <li>
+                    <b><%= item.subjek %></b>
+                    <p><%= item.pesan %></p>
+                </li>
+                <% }) %>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Selamat Datang, <%= pengguna.nama %></h1>
+        <p>ID Pengguna <span id="idPengguna"><%= pengguna.id %></span></p>
+    </div>
+
+    <script src=" /socket.io/socket.io.js">
+    </script>
+    <script>
+        let socket = io();
+        let notifications = document.getElementById('list-notifiaksi');
+        let idPengguna = document.getElementById('idPengguna');
+
+        socket.on(`pengguna-${Number(idPengguna.textContent)}`, notif => {
+            console.log(notif);
+            let item = document.createElement('li');
+            item.innerHTML = `
+            <b>${notif.subjek}</b>
+            <p>${notif.pesan}</p>
+            `;
+
+            notifications.append(item);
+        })
+    </script>
+</body>
+
+</html>

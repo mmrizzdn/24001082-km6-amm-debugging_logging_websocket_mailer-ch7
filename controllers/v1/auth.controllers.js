@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+
 const { PrismaClient } = require('@prisma/client');
 
-const { getHTML, sendMail } = require('../../libs/nodemailer');
-
 require('dotenv').config();
+const { getHTML, sendMail } = require('../../libs/nodemailer');
 
 const prisma = new PrismaClient();
 const { JWT_SECRET } = process.env;
@@ -12,8 +12,10 @@ const { JWT_SECRET } = process.env;
 module.exports = {
 	daftar: async (req, res, next) => {
 		try {
-			let { nama, email, kataSandi } = req.body;
-			if (!nama || !email || !kataSandi) {
+			const { io } = require('../../app');
+
+			let { nama, email, kata_sandi } = req.body;
+			if (!nama || !email || !kata_sandi) {
 				return res.status(400).json({
 					status: false,
 					message: 'name, email, dan kata sandi nggak boleh kosong!',
@@ -33,21 +35,36 @@ module.exports = {
 				});
 			}
 
-			let terenkripsi = await bcrypt.hash(kataSandi, 10);
+			let terenkripsi = await bcrypt.hash(kata_sandi, 10);
 
 			let dataPengguna = {
 				nama,
 				email,
-				kataSandi: terenkripsi
+				kata_sandi: terenkripsi
 			};
 
 			let pengguna = await prisma.pengguna.create({ data: dataPengguna });
-			delete pengguna.kataSandi;
+			delete pengguna.kata_sandi;
+
+			let subjek = 'Pendaftaran Akun';
+			let pesan = 'Penadftaran akun kamu berhasil!';
+
+			let dataNotifikasi = {
+				subjek,
+				pesan,
+				id_pengguna: pengguna.id
+			};
+
+			let notifikasi = await prisma.notifikasi.create({
+				data: dataNotifikasi
+			});
+
+			io.emit(`pengguna-${pengguna.id}`, { notifikasi });
 
 			return res.status(201).json({
 				status: true,
 				message: 'OK',
-				data: pengguna
+				data: { pengguna, notifikasi }
 			});
 		} catch (error) {
 			next(error);
@@ -56,8 +73,8 @@ module.exports = {
 
 	masuk: async (req, res, next) => {
 		try {
-			let { email, kataSandi } = req.body;
-			if (!email || !kataSandi) {
+			let { email, kata_sandi } = req.body;
+			if (!email || !kata_sandi) {
 				return res.status(400).json({
 					status: false,
 					message: 'email dan kata sandi ngga boleh kosong!',
@@ -77,12 +94,12 @@ module.exports = {
 				});
 			}
 
-			let kataSandibenar = await bcrypt.compare(
-				kataSandi,
-				pengguna.kataSandi
+			let kataSandiBenar = await bcrypt.compare(
+				kata_sandi,
+				pengguna.kata_sandi
 			);
 
-			if (!kataSandibenar) {
+			if (!kataSandiBenar) {
 				return res.status(400).json({
 					status: false,
 					message: 'email atau kata sandi nggak valid!',
@@ -90,7 +107,7 @@ module.exports = {
 				});
 			}
 
-			delete pengguna.kataSandi;
+			delete pengguna.kata_sandi;
 
 			let token = jwt.sign({ id: pengguna.id }, JWT_SECRET);
 
@@ -104,18 +121,6 @@ module.exports = {
 		}
 	},
 
-	// whoami: async (req, res, next) => {
-	// 	try {
-	// 		res.json({
-	// 			status: true,
-	// 			message: 'OK',
-	// 			data: req.pengguna
-	// 		});
-	// 	} catch (error) {
-	// 		next(error);
-	// 	}
-	// },
-
 	verifikasiEmail: async (req, res, next) => {
 		try {
 			const { token } = req.query;
@@ -123,10 +128,12 @@ module.exports = {
 				if (err) {
 					return res.send('<h1>Gagal Verifikasi</h1>');
 				}
+
 				await prisma.pengguna.update({
 					data: { terverifikasi: true },
 					where: { id: data.id }
 				});
+
 				res.send('<h1>Verifikasi Berhasil</h1>');
 			});
 		} catch (error) {
@@ -164,15 +171,18 @@ module.exports = {
 
 	resetKataSandi: async (req, res, next) => {
 		try {
-			const { token } = req.query;
+			const { io } = require('../../app');
+
+			let { token } = req.query;
+
 			jwt.verify(token, JWT_SECRET, async (err, data) => {
 				if (err) {
 					return res.send('<h1>Reset Kata Sandi Gagal</h1>');
 				}
 
-				let { kataSandi } = req.body;
+				let { kata_sandi_baru, konfirmasi_kata_sandi } = req.body;
 
-				if (!kataSandi) {
+				if (!kata_sandi_baru || !konfirmasi_kata_sandi) {
 					return res.status(400).json({
 						status: false,
 						message: 'kata sandi nggak boleh kosong!',
@@ -180,12 +190,44 @@ module.exports = {
 					});
 				}
 
-				terenkripsi = await bcrypt.hash(kataSandi, 10);
+				if (kata_sandi_baru == data.kata_sandi) {
+					return res.status(400).json({
+						status: false,
+						message:
+							'kata sandi baru nggak boleh sama dengan kata sandi lama!',
+						data: null
+					});
+				}
+
+				if (kata_sandi_baru !== konfirmasi_kata_sandi) {
+					return res.status(400).json({
+						status: false,
+						message: 'kata sandi tidak sama!',
+						data: null
+					});
+				}
+
+				let terenkripsi = await bcrypt.hash(kata_sandi_baru, 10);
 
 				await prisma.pengguna.update({
-					data: { kataSandi: terenkripsi },
+					data: { kata_sandi: terenkripsi },
 					where: { id: data.id }
 				});
+
+				let subjek = 'Reset Kata Sandi';
+				let pesan = 'Reset kata sandi kamu berhasil!';
+
+				let dataNotifikasi = {
+					subjek,
+					pesan,
+					id_pengguna: data.id
+				};
+
+				let notifikasi = await prisma.notifikasi.create({
+					data: dataNotifikasi
+				});
+
+				io.emit(`pengguna-${data.id}`, { notifikasi });
 
 				res.send('<h1>Reset Kata Sandi Beres</h1>');
 			});
@@ -195,7 +237,7 @@ module.exports = {
 	},
 
 	mintaResetKataSandi: async (req, res, next) => {
-		try {
+		try {			
 			let { email } = req.body;
 
 			if (!email) {
@@ -243,6 +285,31 @@ module.exports = {
 				status: true,
 				message: 'sukses',
 				data: null
+			});
+		} catch (error) {
+			next(error);
+		}
+	},
+
+	welcome: async (req, res, next) => {
+		try {
+			if (req.pengguna.terverifikasi == false) {
+				return res.status(401).json({
+					status: false,
+					message: 'email kamu belum terverifikasi!',
+					data: null
+				});
+			}
+
+			let notifikasi = await prisma.notifikasi.findMany({
+				where: {
+					id_pengguna: req.pengguna.id
+				}
+			});
+
+			return res.render('welcome', {
+				pengguna: req.pengguna,
+				notifikasi
 			});
 		} catch (error) {
 			next(error);

@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Lupa Kata Sandi</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 
 <body>
     <div class="container">
         <h1>Masukkan Email</h1>
-        <p>Permintaan kamu akan dikirmkan via email</p>
-        <form action="/minta-reset" method="POST">
+        <p>Permintaan reset kata sandi akan dikirmkan via email kamu.</p>
+        <form action="/api/v1/lupa-kata-sandi" method="POST">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
